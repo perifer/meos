@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MeOS Direktanmälan</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-text-size-adjust: none;
+      }
+
+      body {
+        font-family: sans-serif;
+        color: #444;
+        margin: 0;
+        background: #fff;
+      }
+
+      main {
+        max-width: 30rem;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: 0 1rem;
+      }
+
+      input[type="text"],
+      select {
+        border: 1px solid rgb(209, 213, 219);
+        border-radius: 5px;
+        padding: 8px;
+        font-size: 1rem;
+        width: 100%;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      }
+
+      input[type="text"] {
+        appearance: none;
+      }
+
+      input[type="text"]:disabled {
+        background-color: #f4f4f4;
+        border-color: #e9e9e9;
+      }
+
+      input[type="checkbox"] {
+        height: 1rem;
+        width: 1rem;
+        margin-right: 0.4rem;
+      }
+
+      button {
+        background-color: DodgerBlue;
+        color: #fff;
+        cursor: pointer;
+        width: 50%;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.2rem;
+        padding: 10px;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        appearance: none;
+        font-weight: bold;
+      }
+
+      label {
+        color: #111;
+        font-weight: 500;
+        font-size: 1.2rem;
+      }
+
+      label.disabled {
+        color: #999;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        color: #555;
+        font-weight: bold;
+        padding-bottom: 0.4rem;
+        margin-bottom: 0.4rem;
+        text-align: center;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+        color: #555;
+      }
+
+      .autocomplete-items {
+        position: absolute;
+        border: 1px solid #d4d4d4;
+        border-bottom: none;
+        border-top: none;
+        z-index: 99;
+        /*position the autocomplete items to be the same width as the container:*/
+        top: 100%;
+        left: 0;
+        right: 0;
+      }
+
+      .autocomplete-items div {
+        padding: 5px;
+        cursor: pointer;
+        background-color: #fff;
+        border-bottom: 1px solid #d4d4d4;
+      }
+      .autocomplete-items div:hover {
+        /*when hovering an item:*/
+        background-color: #e9e9e9;
+      }
+      .autocomplete-active {
+        /*when navigating through the items using the arrow keys:*/
+        background-color: DodgerBlue !important;
+        color: #ffffff;
+      }
+
+      .mb-4 {
+        margin-bottom: 1rem;
+      }
+
+      .pt-4 {
+        padding-top: 1rem;
+      }
+
+      .flex {
+        display: flex;
+      }
+
+      .ml-auto {
+        margin-left: auto;
+      }
+      .mt-auto {
+        margin-top: auto;
+      }
+
+      .float-right {
+        float: right;
+      }
+      .h-screen {
+        height: 100vh;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <h1>Direktanmälan</h1>
+
+      <div id="info" style="display: block; padding: 5px"></div>
+
+      <form autocomplete="off" id="form">
+        <div class="mb-4 shadow-sm">
+          <label
+            >Bricknummer
+            <input
+              type="text"
+              inputmode="numeric"
+              name="card"
+              pattern="[0-9]*"
+              size="10"
+              id="card"
+              placeholder="123456789"
+            />
+          </label>
+        </div>
+
+        <div class="mb-4 shadow-sm">
+          <label class="float-right">
+            <input type="checkbox" name="no-club" id="no-club" />Ingen klubb
+          </label>
+
+          <label>
+            Klubb
+            <input
+              type="text"
+              name="club"
+              list="club-list"
+              size="20"
+              id="club"
+            />
+          </label>
+
+          <datalist id="club-list"></datalist>
+        </div>
+
+        <div class="mb-4 shadow-sm">
+          <label>
+            Namn
+            <input
+              required
+              autocomplete="off"
+              type="text"
+              name="name"
+              size="20"
+              id="name"
+              list="name-list"
+            />
+          </label>
+          <datalist id="name-list"></datalist>
+        </div>
+
+        <div class="mb-4 shadow-sm">
+          <label
+            >Klass
+            <select id="class" required>
+              <option value="">Välj klass</option>
+              <option value="5km">5 km</option>
+              <option value="10km">10 km</option>
+              <option value="open">Öppen motion</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="pt-4 flex">
+          <button class="ml-auto" type="submit">Anmäl</button>
+        </div>
+      </form>
+
+      <img
+        class="mt-auto mb-4"
+        height="20"
+        width="64"
+        src="data:image/png;base64,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"
+        alt="MeOS logga"
+      />
+    </main>
+
+    <script>
+      // In this script tag is just temporary demo stuff
+      const demoData = [
+        { name: "Lisa Svensson", club: "Ankarums OK", card: "1" },
+        { name: "Marie Eriksson", club: "Ankarums OK", card: "2" },
+        { name: "Anders Nilsson", club: "OK Silva", card: "3" },
+        { name: "Elias Andersson", club: "OK Silva", card: "4" },
+        { name: "Stefan Johansson", club: "Ringsjö OK", card: "5" },
+        { name: "Lina Larsson", club: "Ringsjö OK", card: "6" },
+      ];
+
+      const clubs = [
+        ...new Set(
+          demoData.map(function (member) {
+            return member.club;
+          })
+        ),
+      ];
+
+      const clubList = document.getElementById("club-list");
+
+      clubs.forEach((club) => {
+        const option = document.createElement("option");
+        option.setAttribute("value", club);
+        clubList.appendChild(option);
+      });
+
+      function getMemberByCard(card) {
+        return demoData.find((member) => member.card === card);
+      }
+
+      document.getElementById("card").addEventListener("change", (event) => {
+        const card = document.getElementById("club");
+        const name = document.getElementById("name");
+
+        // Only fill in values if the form is empty to not risk overwriting user data.
+        if (card.value !== "" || name.value !== "") {
+          return;
+        }
+
+        const member = getMemberByCard(event.target.value);
+        if (member) {
+          const noClub = document.getElementById("no-club");
+          noClub.checked = false;
+          noClub.disabled = false;
+          // TODO: label style
+          club.value = member.club;
+          name.value = member.name;
+        } else {
+          club.value = "";
+          name.value = "";
+        }
+      });
+
+      function getMembersByClub(club) {
+        return demoData.filter((member) => member.club === club);
+      }
+
+      const nameList = document.getElementById("name-list");
+
+      document.getElementById("club").addEventListener("change", (event) => {
+        const members = getMembersByClub(event.target.value);
+
+        if (members.length) {
+          nameList.innerHTML = "";
+          members.forEach((member) => {
+            const option = document.createElement("option");
+            option.setAttribute("value", member.name);
+            nameList.appendChild(option);
+          });
+        } else {
+          nameList.innerHTML = "";
+        }
+      });
+
+      // End demo stuff
+    </script>
+
+    <script>
+      var noClub = document.getElementById("no-club");
+      var club = document.getElementById("club");
+      noClub.addEventListener("click", function (event) {
+        if (event.target.checked) {
+          club.disabled = true;
+          club.labels[0].classList.add("disabled");
+          club.value = "";
+        } else {
+          club.disabled = false;
+          club.labels[0].classList.remove("disabled");
+        }
+      });
+
+      var form = document.getElementById("form");
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (true) {
+          document.getElementById("form").style.display = "none";
+          info.innerHTML =
+            "<div><h2>✅ Anmälan mottagen</h2><p>Info kommer här</p></div> " +
+            '<div class="pt-4 flex"><button class="ml-auto" onclick="newEntry()">Ny anmälan</button></div>';
+        }
+
+        if (false) {
+          info.style.color = "darkred";
+          info.style.backgroundColor = "mistyrose";
+          info.innerHTML =
+            '<p style="font-size: 140%">' +
+            x[0].childNodes[0].nodeValue +
+            "</p>";
+        }
+      });
+    </script>
+
+    <script>
+      // var xhttp, xmlDoc, i;
+      // xhttp = new XMLHttpRequest();
+      // xhttp.onreadystatechange = function () {
+      //   if (this.readyState == 4 && this.status == 200) {
+      //     xmlDoc = this.responseXML;
+      //     var x = xmlDoc.getElementsByTagName("Class");
+      //     var newSelect = document.getElementById("class");
+      //     for (i = 0; i < x.length; i++) {
+      //       var opt = document.createElement("option");
+      //       opt.value = x[i].getAttribute("id");
+      //       opt.innerHTML =
+      //         x[i].getElementsByTagName("Name")[0].childNodes[0].nodeValue;
+
+      //       newSelect.appendChild(opt);
+      //     }
+      //   }
+      // };
+      // xhttp.open("GET", "/meos?get=entryclass", true);
+      // xhttp.send();
+    </script>
+
+    <script>
+      function submit() {
+        if (true) {
+          document.getElementById("form").style.display = "none";
+          info.style.color = "black";
+          info.style.backgroundColor = "palegreen";
+          info.innerHTML =
+            "<strong>Anmälan mottagen</strong>Info kommer här " +
+            '<br><br><div class="mb-4 shadow-sm" style="width:300px;margin:10px;">' +
+            '<button onclick="newEntry()" style="float:right;">Anmäl andra</button></div><br><br>';
+        }
+
+        if (false) {
+          info.style.color = "darkred";
+          info.style.backgroundColor = "mistyrose";
+          info.innerHTML =
+            '<p style="font-size: 140%">' +
+            x[0].childNodes[0].nodeValue +
+            "</p>";
+        }
+      }
+
+      function newEntry() {
+        var info = document.getElementById("info");
+        info.style.color = "black";
+        info.style.backgroundColor = "transparent";
+        info.innerHTML = "";
+
+        document.getElementById("name").value = "";
+        document.getElementById("card").value = "";
+        document.getElementById("class").value = ""; // Reset class as well?
+        document.getElementById("form").style.display = "block";
+      }
+    </script>
+  </body>
+</html>
